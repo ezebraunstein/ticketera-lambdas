@@ -1,0 +1,42 @@
+CREAR NUEVA LAMBDA:
+
+1) https://us-east-1.console.aws.amazon.com/lambda/home?region=us-east-1#/functions -> AWS LAMBDA -> Create Function
+
+2) Author from Scratch -> lambda-nombre -> Runtime Node.js 18.x -> Arch x86_64
+
+3) Permissions -> Change default execution role -> Use an existing role -> lambda-role-admin
+
+4) Advanced setting -> Enable function URL -> Auth type NONE (más adelante hay que ver esto) -> Configure cross-origin resource 
+sharing (CORS)
+
+5) Create function
+
+6) Configuration -> Function URL -> Edit -> Add new value * (Expose headers y Allow headers) -> Allow methods * -> Save
+
+7) Configuration -> Environment variables -> Edit (si queres agregar KEYS que luego usas dentro del código de la Lambda)
+
+8) La Function URL es lo que usamos cuando le queremos pegar a la lambda con el axios
+
+CREAR CÓDIGO LAMBDA:
+
+1) Pararse en ticketera-lambdas -> mkdir lambda-nombre -> cd lambda-prueba
+
+2) npm init -> Enter hasta el final y Yes
+
+3) touch index.js
+
+4) code .
+
+5) En index.js va todo el código, o pueden ir creando diferentes archivos
+
+6) Instalen todos los módulos y librerías que necesiten
+
+SUBIR CÓDIGO:
+
+1) Instalar y configurar el aws-sdk en sus terminales
+
+2) zip -r function.zip .
+
+3) aws lambda update-function-code --function-name lambda-nombre --zip-file fileb://function.zip
+
+
