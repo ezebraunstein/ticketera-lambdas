@@ -11,7 +11,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 const handler = async (event) => {
 
     const body = JSON.parse(event.body);
-    const createTypeTicketInput = body.createTipeTicketInput;
+    const createTypeTicketInput = body.createTypeTicketInput;
 
     try {
 

@@ -4,18 +4,19 @@ CREAR NUEVA LAMBDA:
 
 2) Author from Scratch -> lambda-nombre -> Runtime Node.js 18.x -> Arch x86_64
 
-3) Permissions -> Change default execution role -> Use an existing role -> lambda-role-admin
-
-4) Advanced setting -> Enable function URL -> Auth type NONE (más adelante hay que ver esto) -> Configure cross-origin resource 
+3) Advanced setting -> Enable function URL -> Auth type NONE (más adelante hay que ver esto) -> Configure cross-origin resource 
 sharing (CORS)
 
-5) Create function
+4) Create function
 
-6) Configuration -> Function URL -> Edit -> Add new value * (Expose headers y Allow headers) -> Allow methods * -> Save
+5) Configuration -> Function URL -> Edit -> Add new value * (Expose headers y Allow headers) -> Allow methods * -> Save
 
-7) Configuration -> Environment variables -> Edit (si queres agregar KEYS que luego usas dentro del código de la Lambda)
+6) Configuration -> Environment variables -> Edit (si queres agregar KEYS que luego usas dentro del código de la Lambda)
 
-8) La Function URL es lo que usamos cuando le queremos pegar a la lambda con el axios
+7) La Function URL es lo que usamos cuando le queremos pegar a la lambda con el axios
+
+8) Puede ser que tengas que agregarles permisos al rol de la lambda para que pueda interactuar con Dynamo, SES, S3, etc:
+Configuration -> General Configuration -> Edit -> (abajo de todo) View the lambda-nombre role -> Add permissions -> Attach policies -> elijan las que quieran, generalmente las full access
 
 CREAR CÓDIGO LAMBDA:
 

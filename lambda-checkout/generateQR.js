@@ -10,7 +10,7 @@ const s3Client = new S3Client({
     }
 });
 
-const qrGenerator = async (eventId, ticketId, emailBuyer, nameEvent, nameTT) => {
+const qrGenerator = async (eventId, ticketId, emailBuyer, eventName, nameTT) => {
     try {
         const qrCodePng = await QRCode.toDataURL(ticketId, {
             errorCorrectionLevel: 'H',
@@ -35,13 +35,13 @@ const qrGenerator = async (eventId, ticketId, emailBuyer, nameEvent, nameTT) => 
         }
 
         const attachment = {
-            filename: `${nameEvent}-${nameTT}.png`,
+            filename: `${eventName}-${nameTT}.png`,
             content: base64Data,
             contentType: 'image/png',
             contentDisposition: 'attachment',
         };
 
-        await sendEmailSuccess(emailBuyer, nameEvent, ticketId, qrCodePng, nameTT);
+        await sendEmailSuccess(emailBuyer, eventName, ticketId, qrCodePng, nameTT);
 
         return {
             attachment,
