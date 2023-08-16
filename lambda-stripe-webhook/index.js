@@ -25,14 +25,14 @@ exports.handler = async (event) => {
 
   switch (stripeEvent.type) {
     case 'checkout.session.completed':
-      await axios.post('https://22uorwsuaswavypcnzkhemts2y0ymqsj.lambda-url.us-east-1.on.aws/',
+      axios.post('https://22uorwsuaswavypcnzkhemts2y0ymqsj.lambda-url.us-east-1.on.aws/',
         {
           paymentId: paymentId,
           status: 'completed',
         });
       break;
     case 'checkout.session.expired':
-      await axios.post('https://22uorwsuaswavypcnzkhemts2y0ymqsj.lambda-url.us-east-1.on.aws/',
+      axios.post('https://22uorwsuaswavypcnzkhemts2y0ymqsj.lambda-url.us-east-1.on.aws/',
         {
           paymentId: paymentId,
           status: 'expired',
@@ -47,3 +47,6 @@ exports.handler = async (event) => {
     body: `OK PaymentID: ${paymentId}`,
   };
 };
+
+
+

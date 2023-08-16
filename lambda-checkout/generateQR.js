@@ -3,7 +3,7 @@ const sendEmailSuccess = require('./sendEmailSuccess');
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 
 const s3Client = new S3Client({
-    region: "sa-east-1",
+    region: "us-east-1",
     credentials: {
         accessKeyId: process.env.ACCESS_KEY,
         secretAccessKey: process.env.SECRET_ACCESS_KEY,
@@ -18,10 +18,10 @@ const qrGenerator = async (eventId, ticketId, emailBuyer, eventName, nameTT) => 
 
         const base64Data = qrCodePng.replace(/^data:image\/png;base64,/, "");
 
-        const fileName = `public/events/${eventId}/tickets/${ticketId}.png`;
+        const fileName = `events/${eventId}/tickets/${nameTT}/${ticketId}.png`;
 
         const uploadParams = {
-            Bucket: 'melo-tickets-bucket',
+            Bucket: 'melo-tickets',
             Key: fileName,
             Body: Buffer.from(base64Data, 'base64'),
             ContentType: 'image/png'

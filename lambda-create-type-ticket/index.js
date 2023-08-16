@@ -28,7 +28,7 @@ const handler = async (event) => {
                 'endDateTT': createTypeTicketInput.endDateTT,
                 'eventID': createTypeTicketInput.eventID,
                 '__typename': 'TypeTicket',
-                'createdAt': new Date().toISOString(),
+                '': new Date().toISOString(),
                 'updatedAt': new Date().toISOString()
 
             }

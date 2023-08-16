@@ -50,7 +50,7 @@ const updateTypeTicket = async (cart, paymentId) => {
         await dynamoDb.update({
             TableName: 'Payment-zn4tkt5eivea5af5egpjlychcm-dev',
             Key: { id: paymentId },
-            UpdateExpression: 'set paymentStatus = :q, updatedAt = :u',
+            UpdateExpression: 'set paymentStatus = :q, updatedDate = :u',
             ExpressionAttributeValues: { ':q': 'FAILED', ':u': new Date().toISOString() },
         }).promise();
     }

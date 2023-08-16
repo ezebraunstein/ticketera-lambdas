@@ -30,7 +30,7 @@ Content-Type: text/html; charset=utf-8
 <head>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap');
-    
+
     body {
       font-family: 'Poppins', sans-serif;
       text-align: center;
@@ -38,7 +38,7 @@ Content-Type: text/html; charset=utf-8
       color: #333;
       padding: 15px;
     }
-    
+
     h1, p {
       margin: 0;
       padding: 10px 0;
@@ -74,4 +74,5 @@ ${attachment.content}
     console.error('Failed to send email:', error);
   }
 };
+
 

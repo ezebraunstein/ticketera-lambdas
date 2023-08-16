@@ -1,4 +1,3 @@
-// const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const AWS = require('aws-sdk');
 
 AWS.config.update({
@@ -6,14 +5,6 @@ AWS.config.update({
     accessKeyId: process.env.ACCESS_KEY,
     secretAccessKey: process.env.SECRET_ACCESS_KEY,
 });
-
-// const s3Client = new S3Client({
-//     region: "sa-east-1",
-//     credentials: {
-//         accessKeyId: process.env.ACCESS_KEY,
-//         secretAccessKey: process.env.SECRET_ACCESS_KEY,
-//     }
-// });
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
@@ -31,8 +22,8 @@ const handler = async (event) => {
                 'nameEvent': createEventInput.nameEvent,
                 'locationEvent': createEventInput.locationEvent,
                 'descriptionEvent': createEventInput.descriptionEvent,
-                'bannerEvent': createEventInput.bannerEvent,
-                'miniBannerEvent': createEventInput.miniBannerEvent,
+                'flyerMiniEvent': createEventInput.flyerMiniEvent,
+                'flyerEvent': createEventInput.flyerEvent,
                 'startDateE': createEventInput.startDateE,
                 'upDateE': createEventInput.upDateE,
                 'downDateE': createEventInput.downDateE,

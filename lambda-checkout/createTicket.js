@@ -1,5 +1,4 @@
 const AWS = require('aws-sdk');
-const Swal = require('sweetalert2');
 const { v4: uuid } = require('uuid');
 const generateQR = require('./generateQR');
 
@@ -19,22 +18,29 @@ const handleCheckout = async (cart, emailBuyer, dniBuyer, eventName, eventID, pa
 
         for (const item of cart) {
             for (let i = 0; i < item.selectedQuantity; i++) {
+
                 const ticketPromise = (async () => {
 
-                    const ticketId = uuid();
-                    const nameEvent = eventName;
-                    const eventId = eventID;
-                    const nameTT = item.nameTT;
-                    const key = await generateQR(eventId, ticketId, emailBuyer, nameEvent, nameTT);
+                    const ticketID = uuid();
+                    const key = await generateQR(eventID, ticketID, emailBuyer, eventName, item.nameTT);
+                    let rrppEventID = item.rrppEventId;
+
+                    if (!rrppEventID) {
+                        rrppEventID = '0';
+                    }
 
                     const ticketData = {
-                        id: ticketId,
+                        id: ticketID,
                         qrTicket: key.key,
                         validTicket: true,
                         dniTicket: dniBuyer,
                         emailTicket: emailBuyer,
+                        eventID: eventID,
                         typeticketID: item.id,
+                        rrppeventID: rrppEventID
                     };
+
+                    console.log('Ticket data:', ticketData);
 
                     try {
                         await dynamoDb.put({
@@ -46,21 +52,36 @@ const handleCheckout = async (cart, emailBuyer, dniBuyer, eventName, eventID, pa
                         console.error('Error creating ticket:', error);
                     }
 
-                    try {
-                        await dynamoDb.update({
-                            TableName: 'Payment-zn4tkt5eivea5af5egpjlychcm-dev',
-                            Key: { id: paymentId },
-                            UpdateExpression: 'set paymentStatus = :q, updatedAt = :u',
-                            ExpressionAttributeValues: { ':q': 'COMPLETED', ':u': new Date().toISOString() },
-                        }).promise();
-                        console.log('Payment updated:', paymentId);
-                    } catch (error) {
-                        console.error('Error updating payment:', error);
-                    }
-
                 })();
-
                 ticketPromises.push(ticketPromise);
+            };
+
+            try {
+                await dynamoDb.update({
+                    TableName: 'Payment-zn4tkt5eivea5af5egpjlychcm-dev',
+                    Key: { id: paymentId },
+                    UpdateExpression: 'set paymentStatus = :q, updatedDate = :u',
+                    ExpressionAttributeValues: { ':q': 'COMPLETED', ':u': new Date().toISOString() },
+                }).promise();
+                console.log('Payment updated:', paymentId);
+            } catch (error) {
+                console.error('Error updating payment:', error);
+            }
+
+            for (const item of cart) {
+                const itemID = item.id;
+                const itemQuantity = item.quantityTT - item.selectedQuantity;
+        
+                const updateTypeTicketInput = {
+                    id: itemID,
+                    quantityTT: itemQuantity
+                };
+        
+                await API.graphql({
+                    query: updateTypeTicket,
+                    variables: { input: updateTypeTicketInput }
+                });
+        
             };
         };
 

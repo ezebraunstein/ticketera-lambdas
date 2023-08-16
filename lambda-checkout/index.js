@@ -47,14 +47,16 @@ exports.handler = async (event) => {
     const emailBuyer = payment.emailBuyer;
     const dniBuyer = payment.dniBuyer;
     const eventName = payment.eventName;
-    const eventId = payment.eventID;
+    const eventID = payment.eventID;
 
 
     if (status === 'completed') {
-        await createTicket(cart, emailBuyer, dniBuyer, eventName, eventId, paymentId);
+        await createTicket(cart, emailBuyer, dniBuyer, eventName, eventID, paymentId);
+        console.log('go to create ticket');
     } else {
-        await updateTypeTicket(cart, paymentId);
+        //await updateTypeTicket(cart, paymentId);
         await sendEmailFail(emailBuyer, eventName);
+        console.log('go to fail');
     }
 
 };
