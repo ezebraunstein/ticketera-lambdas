@@ -1,40 +1,68 @@
-const AWS = require('aws-sdk');
-const ses = new AWS.SES({ region: 'us-east-1' });
+const axios = require('axios');
 
 exports.handler = async (event) => {
     const body = JSON.parse(event.body);
+    const eventName = body.eventName;
     const to = body.emailBuyer;
-    const nameEvent = body.eventName;
-    const boundary = '----boundary';
-
-    const rawMessage = `From: 'Melo Tickets' <ticketsmelo@gmail.com>
-To: ${to}
-Subject: Error en tu pago para ${nameEvent}
-Content-Type: multipart/mixed; boundary=${boundary}
-
---${boundary}
-Content-Type: text/html; charset=utf-8
-
+    const htmlContent = `
 <html>
-<head></head>
+<head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap');
+
+        body {
+        font-family: 'Poppins', sans-serif;
+        text-align: center;
+        background: linear-gradient(to right, lime, orange);
+        color: #333;
+        padding: 15px;
+        }
+
+        h1, p {
+        margin: 0;
+        padding: 10px 0;
+        }
+    </style>
+</head>
 <body>
   <h1>No se ha podido procesar tu pago</h1>
-  <p>Se generó un error al intentar procesar tu pago para el evento: ${nameEvent}</p>
+  <p>Se generó un error al intentar procesar tu pago para ${eventName}</p>
 </body>
 </html>
+`;
 
---${boundary}--`;
-
-    const params = {
-        RawMessage: {
-            Data: rawMessage,
+    const sparkpostPayload = {
+        content: {
+            from: 'Melo@mail.melo.events',
+            subject: `Error en tu pago para ${eventName}`,
+            html: htmlContent
         },
+        recipients: [
+            {
+                address: to
+            }
+        ]
     };
 
+    const SPARKPOST_API_URL = "https://api.sparkpost.com/api/v1/transmissions";
+    const SPARKPOST_API_KEY = process.env.SPARKPOST_API_KEY;
+
     try {
-        const response = await ses.sendRawEmail(params).promise();
-        console.log('Email sent:', response);
+        await axios.post(SPARKPOST_API_URL, sparkpostPayload, {
+            headers: {
+                'Authorization': SPARKPOST_API_KEY,
+                'Content-Type': 'application/json'
+            }
+        });
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: "Email sent successfully" }),
+        };
     } catch (error) {
         console.error('Failed to send email:', error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: "Email sending failed" }),
+        };
     }
 };

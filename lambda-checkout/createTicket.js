@@ -1,6 +1,9 @@
 const AWS = require('aws-sdk');
 const { v4: uuid } = require('uuid');
 const generateQR = require('./generateQR');
+const sendEmailSuccess = require('./sendEmailSuccess');
+const updateTypeTicket = require('./updateTypeTicket');
+const updatePaymentCompleted = require('./updatePaymentCompleted');
 
 AWS.config.update({
     region: "us-east-1",
@@ -10,86 +13,56 @@ AWS.config.update({
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-const handleCheckout = async (cart, emailBuyer, dniBuyer, eventName, eventID, paymentId) => {
+const createTicket = async (cart, emailBuyer, dniBuyer, eventName, eventID, paymentId) => {
 
     try {
 
         const ticketPromises = [];
+        const emailAttachments = [];
 
         for (const item of cart) {
             for (let i = 0; i < item.selectedQuantity; i++) {
 
-                const ticketPromise = (async () => {
+                const ticketID = uuid();
 
-                    const ticketID = uuid();
-                    const key = await generateQR(eventID, ticketID, emailBuyer, eventName, item.nameTT);
-                    let rrppEventID = item.rrppEventId;
+                const qr = await generateQR(eventID, ticketID, eventName, item.nameTT);
 
-                    if (!rrppEventID) {
-                        rrppEventID = '0';
-                    }
+                emailAttachments.push(qr.attachment);
 
-                    const ticketData = {
-                        id: ticketID,
-                        qrTicket: key.key,
-                        validTicket: true,
-                        dniTicket: dniBuyer,
-                        emailTicket: emailBuyer,
-                        eventID: eventID,
-                        typeticketID: item.id,
-                        rrppeventID: rrppEventID
-                    };
-
-                    console.log('Ticket data:', ticketData);
-
-                    try {
-                        await dynamoDb.put({
-                            TableName: 'Ticket-zn4tkt5eivea5af5egpjlychcm-dev',
-                            Item: ticketData
-                        }).promise();
-                        console.log('Ticket created:', ticketData);
-                    } catch (error) {
-                        console.error('Error creating ticket:', error);
-                    }
-
-                })();
-                ticketPromises.push(ticketPromise);
-            };
-
-            try {
-                await dynamoDb.update({
-                    TableName: 'Payment-zn4tkt5eivea5af5egpjlychcm-dev',
-                    Key: { id: paymentId },
-                    UpdateExpression: 'set paymentStatus = :q, updatedDate = :u',
-                    ExpressionAttributeValues: { ':q': 'COMPLETED', ':u': new Date().toISOString() },
-                }).promise();
-                console.log('Payment updated:', paymentId);
-            } catch (error) {
-                console.error('Error updating payment:', error);
-            }
-
-            for (const item of cart) {
-                const itemID = item.id;
-                const itemQuantity = item.quantityTT - item.selectedQuantity;
-        
-                const updateTypeTicketInput = {
-                    id: itemID,
-                    quantityTT: itemQuantity
+                const rrppEventID = item.rrppEventId || '0';
+                const ticketData = {
+                    id: ticketID,
+                    qrTicket: qr.key,
+                    validTicket: true,
+                    dniTicket: dniBuyer,
+                    emailTicket: emailBuyer,
+                    eventID: eventID,
+                    typeticketID: item.id,
+                    rrppeventID: rrppEventID
                 };
-        
-                await API.graphql({
-                    query: updateTypeTicket,
-                    variables: { input: updateTypeTicketInput }
-                });
-        
+
+                const ticketPromise = dynamoDb.put({
+                    TableName: 'Ticket-zn4tkt5eivea5af5egpjlychcm-dev',
+                    Item: ticketData
+                }).promise();
+
+                //console.log('Ticket data:', ticketData);
+                ticketPromises.push(ticketPromise);
             };
         };
 
         await Promise.all(ticketPromises);
+
+        //console.log('Updating type ticket...');
+        await updateTypeTicket(cart);
+        //console.log('Updating payment...');
+        await updatePaymentCompleted(paymentId);
+        //console.log('Sending email...');
+        await sendEmailSuccess(emailBuyer, eventName, emailAttachments);
 
     } catch (error) {
         console.log('Error creating tickets:', error);
     }
 };
 
-module.exports = handleCheckout;
+module.exports = createTicket;

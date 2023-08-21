@@ -8,7 +8,7 @@ AWS.config.update({
 
 const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
-const updateTypeTicket = async (cart, paymentId) => {
+const updateTypeTicket = async (cart) => {
 
     for (const typeTicket of cart) {
 
@@ -38,20 +38,13 @@ const updateTypeTicket = async (cart, paymentId) => {
 
         const item = await fetchTypeTicket(typeTicketId);
 
-        const itemQuantity = item.quantityTT + typeTicket.selectedQuantity;
+        const itemQuantity = item.quantityTT - typeTicket.selectedQuantity;
 
         await dynamoDb.update({
             TableName: 'TypeTicket-zn4tkt5eivea5af5egpjlychcm-dev',
             Key: { id: typeTicketId },
             UpdateExpression: 'set quantityTT = :q',
             ExpressionAttributeValues: { ':q': itemQuantity },
-        }).promise();
-
-        await dynamoDb.update({
-            TableName: 'Payment-zn4tkt5eivea5af5egpjlychcm-dev',
-            Key: { id: paymentId },
-            UpdateExpression: 'set paymentStatus = :q, updatedDate = :u',
-            ExpressionAttributeValues: { ':q': 'FAILED', ':u': new Date().toISOString() },
         }).promise();
     }
 

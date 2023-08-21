@@ -25,14 +25,14 @@ exports.handler = async (event) => {
 
   switch (stripeEvent.type) {
     case 'checkout.session.completed':
-      axios.post('https://22uorwsuaswavypcnzkhemts2y0ymqsj.lambda-url.us-east-1.on.aws/',
+      await axios.post('https://22uorwsuaswavypcnzkhemts2y0ymqsj.lambda-url.us-east-1.on.aws/',
         {
           paymentId: paymentId,
           status: 'completed',
         });
       break;
     case 'checkout.session.expired':
-      axios.post('https://22uorwsuaswavypcnzkhemts2y0ymqsj.lambda-url.us-east-1.on.aws/',
+      await axios.post('https://22uorwsuaswavypcnzkhemts2y0ymqsj.lambda-url.us-east-1.on.aws/',
         {
           paymentId: paymentId,
           status: 'expired',

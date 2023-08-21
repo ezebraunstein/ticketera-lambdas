@@ -1,31 +1,11 @@
-const AWS = require('aws-sdk');
-const ses = new AWS.SES({ region: 'us-east-1' });
+const axios = require('axios');
 
 exports.handler = async (event) => {
   const body = JSON.parse(event.body);
-  const nameEvent = body.eventName;
-  const ticketId = body.ticketId;
+  const eventName = body.eventName;
   const to = body.emailBuyer;
-  const base64QRCode = body.base64QRCode;
-  const nameTT = body.nameTT;
-
-  const attachment = {
-    filename: `${nameEvent}_${nameTT}.jpeg`,
-    content: base64QRCode.split('base64,')[1],
-    contentType: 'image/jpeg',
-    contentDisposition: 'attachment',
-  };
-
-  const boundary = '----boundary';
-
-  const rawMessage = `From: 'Melo Tickets' <ticketsmelo@gmail.com>
-To: ${to}
-Subject: Tus Tickets para ${nameEvent}
-Content-Type: multipart/mixed; boundary=${boundary}
-
---${boundary}
-Content-Type: text/html; charset=utf-8
-
+  const emailAttachments = body.emailAttachments;
+  const htmlContent = `
 <html>
 <head>
   <style>
@@ -47,32 +27,50 @@ Content-Type: text/html; charset=utf-8
 </head>
 <body>
   <h1>Tu código QR</h1>
-  <p>Acá está tu código QR ${nameTT} para ${nameEvent}: </p>
+  <p>Acá está tus tickets para ${eventName}: </p>
 </body>
 </html>
+`;
 
+  const attachments = emailAttachments.map(attachment => ({
+    name: attachment.filename,
+    type: attachment.contentType,
+    data: attachment.content
+  }));
 
---${boundary}
-Content-Type: ${attachment.contentType}
-Content-Disposition: ${attachment.contentDisposition}; filename="${attachment.filename}"
-Content-Transfer-Encoding: base64
-
-${attachment.content}
-
---${boundary}--`;
-
-  const params = {
-    RawMessage: {
-      Data: rawMessage,
+  const sparkpostPayload = {
+    content: {
+      from: 'Melo@mail.melo.events',
+      subject: `Tus Tickets para ${eventName}`,
+      html: htmlContent,
+      attachments
     },
+    recipients: [
+      {
+        address: to
+      }
+    ]
   };
 
+  const SPARKPOST_API_URL = "https://api.sparkpost.com/api/v1/transmissions";
+  const SPARKPOST_API_KEY = process.env.SPARKPOST_API_KEY;
+
   try {
-    const response = await ses.sendRawEmail(params).promise();
-    console.log('Email sent:', response);
+    await axios.post(SPARKPOST_API_URL, sparkpostPayload, {
+      headers: {
+        'Authorization': SPARKPOST_API_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Email sent successfully" }),
+    };
   } catch (error) {
     console.error('Failed to send email:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ message: "Email sending failed" }),
+    };
   }
 };
-
-

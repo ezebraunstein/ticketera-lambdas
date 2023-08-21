@@ -41,9 +41,7 @@ const handler = async (event) => {
         console.log("Event created successfully!");
 
     } catch (error) {
-
         console.log(error);
-
     }
 
     return createEventInput.id;

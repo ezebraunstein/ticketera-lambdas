@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 const createTicket = require('./createTicket');
-const updateTypeTicket = require('./updateTypeTicket');
 const sendEmailFail = require('./sendEmailFail');
+const updatePaymentFailed = require('./updatePaymentFailed');
 
 AWS.config.update({
     region: "us-east-1",
@@ -34,7 +34,7 @@ exports.handler = async (event) => {
                     console.error("Error fetching payment:", err);
                     reject(err);
                 } else {
-                    console.log("Fetched payment:", items.Items[0]);
+                    //console.log("Fetched payment:", items.Items[0]);
                     resolve(items.Items[0]);
                 }
             });
@@ -43,20 +43,32 @@ exports.handler = async (event) => {
 
     const payment = await fetchPayment(paymentId);
 
+    const paymentStatus = payment.paymentStatus;
+
+    if (paymentStatus === 'COMPLETED') {
+        //console.log('Payment already completed. Exiting...');
+        return;
+    }
+
     const cart = payment.cart;
     const emailBuyer = payment.emailBuyer;
     const dniBuyer = payment.dniBuyer;
     const eventName = payment.eventName;
     const eventID = payment.eventID;
 
+    if (paymentStatus === 'PENDING') {
 
-    if (status === 'completed') {
-        await createTicket(cart, emailBuyer, dniBuyer, eventName, eventID, paymentId);
-        console.log('go to create ticket');
-    } else {
-        //await updateTypeTicket(cart, paymentId);
-        await sendEmailFail(emailBuyer, eventName);
-        console.log('go to fail');
+        //console.log('Payment status is pending. Continuing with the process...');
+
+        if (status === 'completed') {
+
+            //console.log('Go to create ticket');
+            await createTicket(cart, emailBuyer, dniBuyer, eventName, eventID, paymentId);
+
+        } else {
+            //console.log('Handling failed payment...');
+            await updatePaymentFailed(paymentId);
+            await sendEmailFail(emailBuyer, eventName);
+        }
     }
-
 };
