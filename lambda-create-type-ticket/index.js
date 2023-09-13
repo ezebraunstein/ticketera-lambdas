@@ -30,7 +30,6 @@ const handler = async (event) => {
                 '__typename': 'TypeTicket',
                 '': new Date().toISOString(),
                 'updatedAt': new Date().toISOString()
-
             }
         };
 

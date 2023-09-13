@@ -23,7 +23,6 @@ const handler = async (event) => {
                 'locationEvent': createEventInput.locationEvent,
                 'descriptionEvent': createEventInput.descriptionEvent,
                 'flyerMiniEvent': createEventInput.flyerMiniEvent,
-                'flyerEvent': createEventInput.flyerEvent,
                 'startDateE': createEventInput.startDateE,
                 'upDateE': createEventInput.upDateE,
                 'downDateE': createEventInput.downDateE,

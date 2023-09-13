@@ -2,7 +2,7 @@ const Stripe = require("stripe");
 const stripe = new Stripe(process.env.STRIPE_TEST_SECRET_KEY);
 
 exports.handler = async (event) => {
-  const { line_items, success_url, cancel_url, email, payment_id, expires_at, locale } = JSON.parse(event.body);
+  const { line_items, success_url, cancel_url, email, payment_id, event_id, expires_at, locale } = JSON.parse(event.body);
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -15,6 +15,7 @@ exports.handler = async (event) => {
       expires_at,
       metadata: {
         payment_id,
+        event_id,
       },
       locale,
     });
