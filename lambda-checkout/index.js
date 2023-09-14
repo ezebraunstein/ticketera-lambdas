@@ -1,3 +1,8 @@
+process.env["PATH"] =
+    process.env["PATH"] + ":" + process.env["LAMBDA_TASK_ROOT"] + "/lib";
+process.env["LD_LIBRARY_PATH"] = process.env["LAMBDA_TASK_ROOT"] + "/lib";
+process.env["PKG_CONFIG_PATH"] = process.env["LAMBDA_TASK_ROOT"] + "/lib";
+
 const AWS = require('aws-sdk');
 const createTicket = require('./createTicket');
 const sendEmailFail = require('./sendEmailFail');

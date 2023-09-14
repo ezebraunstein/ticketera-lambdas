@@ -1,5 +1,6 @@
 const QRCode = require('qrcode');
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const mergeImageWithQR = require('./mergeImage');
 
 const s3Client = new S3Client({
     region: "us-east-1",
@@ -15,20 +16,24 @@ const qrGenerator = async (eventID, ticketID, eventName, nameTT) => {
             errorCorrectionLevel: 'H',
         });
 
-        const base64Data = QRTicket.replace(/^data:image\/png;base64,/, "");
+        const templatePath = './mail-template.png';
+
+        const mergedQRTicket = await mergeImageWithQR(QRTicket, eventName, ticketID, templatePath);
+
+        const base64Plain = QRTicket.replace(/^data:image\/png;base64,/, "");
+        const base64Merged = mergedQRTicket.replace(/^data:image\/png;base64,/, "");
 
         const fileName = `events/${eventID}/tickets/${nameTT}/${ticketID}.png`;
 
         const uploadParams = {
             Bucket: 'melo-tickets',
             Key: fileName,
-            Body: Buffer.from(base64Data, 'base64'),
+            Body: Buffer.from(base64Plain, 'base64'),
             ContentType: 'image/png'
         };
 
         try {
             await s3Client.send(new PutObjectCommand(uploadParams));
-            //console.log("Success uploading so S3");
         } catch (error) {
             console.log("Error uploading to S3", error);
         }
@@ -36,7 +41,7 @@ const qrGenerator = async (eventID, ticketID, eventName, nameTT) => {
         return {
             key: fileName,
             attachment: {
-                content: QRTicket.split('base64,')[1],
+                content: base64Merged.split('base64,')[1],
                 filename: `${eventName}-${nameTT}.png`,
                 contentType: 'image/png',
                 contentDisposition: 'attachment',

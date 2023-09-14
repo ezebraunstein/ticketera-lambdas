@@ -11,6 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1430.0",
-    "axios": "^1.4.0"
+    "axios": "^1.4.0",
+    "canvas": "^2.11.2",
+    "node-canvas": "^2.9.0"
   }
 }
