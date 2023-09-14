@@ -39,7 +39,6 @@ exports.handler = async (event) => {
                     console.error("Error fetching payment:", err);
                     reject(err);
                 } else {
-                    //console.log("Fetched payment:", items.Items[0]);
                     resolve(items.Items[0]);
                 }
             });
@@ -51,7 +50,6 @@ exports.handler = async (event) => {
     const paymentStatus = payment.paymentStatus;
 
     if (paymentStatus === 'COMPLETED') {
-        //console.log('Payment already completed. Exiting...');
         return;
     }
 
@@ -62,16 +60,9 @@ exports.handler = async (event) => {
     const eventID = payment.eventID;
 
     if (paymentStatus === 'PENDING') {
-
-        //console.log('Payment status is pending. Continuing with the process...');
-
         if (status === 'completed') {
-
-            //console.log('Go to create ticket');
             await createTicket(cart, emailBuyer, dniBuyer, eventName, eventID, paymentId);
-
         } else {
-            //console.log('Handling failed payment...');
             await updatePaymentFailed(paymentId);
             await sendEmailFail(emailBuyer, eventName);
         }

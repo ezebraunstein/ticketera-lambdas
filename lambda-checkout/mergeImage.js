@@ -1,17 +1,18 @@
-const { createCanvas, loadImage } = require('canvas');
+const { registerFont, createCanvas, loadImage } = require('canvas');
 
-async function mergeImageWithQR(QRTicket, eventName, ticketID, templatePath) {
+async function mergeImageWithQR(QRTicket, eventName, nameTT, templatePath) {
 
-    console.log("Merging image with QR...");
-    
-    const canvas = createCanvas(2532, 1170);
+    registerFont(__dirname.concat('/fonts/display-black.woff'), { family: 'Helvetica Display Black' });
+    registerFont(__dirname.concat('/fonts/display-extrabold.woff'), { family: 'Helvetica Display ExtraBold' });
+
+    const canvas = createCanvas(1170, 2532);
     const ctx = canvas.getContext('2d');
 
     // Load the pre-designed template image
     const template = await loadImage(templatePath);
 
     // Draw the template onto the canvas
-    ctx.drawImage(template, 0, 0, 2532, 1170);
+    ctx.drawImage(template, 0, 0, 1170, 2532);
 
     // Load the QR code image
     const qrImage = await loadImage(QRTicket);
@@ -26,23 +27,21 @@ async function mergeImageWithQR(QRTicket, eventName, ticketID, templatePath) {
     ctx.fillStyle = "#E4FF1A";
 
     // Add eventName to the image
-    ctx.font = '150px Arial';
+    ctx.font = '150px "Helvetica Display Black""';
     const eventNameMetrics = ctx.measureText(eventName);
     const eventNameX = 585 - eventNameMetrics.width / 2;  // Centering text
     const eventNameY = 896;
     ctx.fillText(eventName, eventNameX, eventNameY);
 
     // Add ticketID to the image
-    ctx.font = '100px Arial';
-    const ticketIDMetrics = ctx.measureText(ticketID);
-    const ticketIDX = 585 - ticketIDMetrics.width / 2; // Centering text
-    const ticketIDY = 2120;
-    ctx.fillText(ticketID, ticketIDX, ticketIDY);
+    ctx.font = '100px "Helvetica Display ExtraBold"';
+    const nameTTMetrics = ctx.measureText(nameTT);
+    const nameTTX = 585 - nameTTMetrics.width / 2; // Centering text
+    const nameTTY = 2120;
+    ctx.fillText(nameTT, nameTTX, nameTTY);
 
     // Convert canvas to image
     const mergedImage = canvas.toDataURL();
-
-    console.log("Merged Image Data:", mergedImage);
 
     return mergedImage;
 }

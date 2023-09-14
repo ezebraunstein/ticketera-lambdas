@@ -46,18 +46,14 @@ const createTicket = async (cart, emailBuyer, dniBuyer, eventName, eventID, paym
                     Item: ticketData
                 }).promise();
 
-                //console.log('Ticket data:', ticketData);
                 ticketPromises.push(ticketPromise);
             };
         };
 
         await Promise.all(ticketPromises);
 
-        //console.log('Updating type ticket...');
         await updateTypeTicket(cart);
-        //console.log('Updating payment...');
         await updatePaymentCompleted(paymentId);
-        //console.log('Sending email...');
         await sendEmailSuccess(emailBuyer, eventName, emailAttachments);
 
     } catch (error) {

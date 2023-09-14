@@ -18,9 +18,9 @@ const qrGenerator = async (eventID, ticketID, eventName, nameTT) => {
 
         const templatePath = './mail-template.png';
 
-        const mergedQRTicket = await mergeImageWithQR(QRTicket, eventName, ticketID, templatePath);
+        const mergedQRTicket = await mergeImageWithQR(QRTicket, eventName, nameTT, templatePath);
 
-        const base64Plain = QRTicket.replace(/^data:image\/png;base64,/, "");
+        // const base64Data = QRTicket.replace(/^data:image\/png;base64,/, "");
         const base64Merged = mergedQRTicket.replace(/^data:image\/png;base64,/, "");
 
         const fileName = `events/${eventID}/tickets/${nameTT}/${ticketID}.png`;
@@ -28,7 +28,7 @@ const qrGenerator = async (eventID, ticketID, eventName, nameTT) => {
         const uploadParams = {
             Bucket: 'melo-tickets',
             Key: fileName,
-            Body: Buffer.from(base64Plain, 'base64'),
+            Body: Buffer.from(base64Merged, 'base64'),
             ContentType: 'image/png'
         };
 
@@ -41,8 +41,8 @@ const qrGenerator = async (eventID, ticketID, eventName, nameTT) => {
         return {
             key: fileName,
             attachment: {
-                content: base64Merged.split('base64,')[1],
-                filename: `${eventName}-${nameTT}.png`,
+                content: mergedQRTicket.split('base64,')[1],
+                filename: `${eventName} ${nameTT}.png`,
                 contentType: 'image/png',
                 contentDisposition: 'attachment',
             }
